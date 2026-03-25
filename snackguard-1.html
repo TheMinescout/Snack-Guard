@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SnackGuard Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6200ea;
+            --primary-dark: #4a00b8;
+            --accent: #ff4081;
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --text: #212121;
+            --text-secondary: #757575;
+            --error: #f44336;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding-bottom: 70px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            display: flex;
+            border-top: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab-icon {
+            font-size: 20px;
+        }
+
+        .page {
+            display: none;
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+        }
+
+        .btn-danger {
+            background: var(--error);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            width: auto;
+            margin: 0;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .snack-item {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .snack-item:active {
+            background: var(--bg);
+        }
+
+        .snack-item.selected {
+            border-color: var(--primary);
+            background: rgba(98, 0, 234, 0.05);
+        }
+
+        .snack-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .snack-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .snack-weight {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .snack-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-safe {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .status-suspicious {
+            background: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .status-violated {
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--error);
+        }
+
+        .person-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .person-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .person-info {
+            flex: 1;
+        }
+
+        .person-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .person-stats {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .badge {
+            background: var(--error);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .photo-preview {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: block;
+        }
+
+        .timeline-item {
+            border-left: 2px solid var(--border);
+            padding-left: 16px;
+            padding-bottom: 16px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .timeline-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .timeline-content {
+            font-size: 13px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .stat-box {
+            background: var(--bg);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .modal-buttons .btn {
+            margin: 0;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            background: black;
+            margin: 12px 0;
+        }
+
+        video, canvas {
+            width: 100%;
+            display: block;
+        }
+
+        .capture-btn {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid var(--primary);
+            cursor: pointer;
+        }
+
+        .notification {
+            position: fixed;
+            top: 80px;
+            left: 16px;
+            right: 16px;
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 300;
+            display: none;
+            animation: slideDown 0.3s;
+        }
+
+        .notification.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .notification-body {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .comparison-image {
+            position: relative;
+        }
+
+        .comparison-image img {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .comparison-label {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .diff-highlight {
+            position: absolute;
+            border: 2px solid var(--error);
+            border-radius: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 14px;
+        }
+
+        .setting-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔒 SnackGuard Pro</h1>
+        <p>Protecting your snacks since today</p>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard-page" class="page active">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Quick Actions</div>
+            </div>
+            <button class="btn" onclick="quickCheck()">🚨 Quick Check Now</button>
+            <button class="btn btn-secondary" onclick="openModal('add-snack-modal')">➕ Add New Snack</button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Active Snacks</div>
+            </div>
+            <div id="snack-list"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Recent Activity</div>
+            </div>
+            <div id="recent-activity"></div>
+        </div>
+    </div>
+
+    <!-- Snacks Page -->
+    <div id="snacks-page" class="page">
+        <div class="card">
+            <button class="btn" onclick="openModal('add-snack-modal')">➕ Add New Snack</button>
+        </div>
+        <div id="all-snacks-list"></div>
+    </div>
+
+    <!-- People Page -->
+    <div id="people-page" class="page">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Suspect Leaderboard</div>
+            </div>
+            <div id="people-list"></div>
+        </div>
+        <div class="card">
+            <button class="btn" onclick="openModal('add-person-modal')">➕ Add Person</button>
+        </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="settings-page" class="page">
+        <div class="card">
+            <div class="card-title">Detection Settings</div>
+            <div class="input-group">
+                <label>Weight Threshold (grams)</label>
+                <input type="number" id="weight-threshold" value="50" min="1">
+            </div>
+            <div class="input-group">
+                <label>Expected Daily Consumption (grams)</label>
+                <input type="number" id="daily-consumption" value="30" min="0">
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Notifications</div>
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Enable Alerts</div>
+                    <div class="setting-description">Get notified of suspicious activity</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="enable-notifications" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Photo Evidence</div>
+                    <div class="setting-description">Save comparison photos</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="save-evidence" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Cloudflare Worker</div>
+            <div class="input-group">
+                <label>Worker URL</label>
+                <input type="url" id="worker-url" placeholder="https://your-worker.workers.dev">
+            </div>
+            <button class="btn" onclick="saveSettings()">💾 Save Settings</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Data Management</div>
+            <button class="btn btn-secondary" onclick="exportData()">📤 Export Data</button>
+            <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+        </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <button class="tab active" onclick="switchTab('dashboard')">
+            <span class="tab-icon">🏠</span>
+            <span>Dashboard</span>
+        </button>
+        <button class="tab" onclick="switchTab('snacks')">
+            <span class="tab-icon">🍿</span>
+            <span>Snacks</span>
+        </button>
+        <button class="tab" onclick="switchTab('people')">
+            <span class="tab-icon">👥</span>
+            <span>People</span>
+        </button>
+        <button class="tab" onclick="switchTab('settings')">
+            <span class="tab-icon">⚙️</span>
+            <span>Settings</span>
+        </button>
+    </div>
+
+    <!-- Add Snack Modal -->
+    <div id="add-snack-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Add New Snack</div>
+            <div class="input-group">
+                <label>Snack Name</label>
+                <input type="text" id="new-snack-name" placeholder="e.g., Doritos">
+            </div>
+            <div class="input-group">
+                <label>Initial Weight (grams)</label>
+                <input type="number" id="new-snack-weight" placeholder="e.g., 250">
+            </div>
+            <div class="input-group">
+                <label>Location</label>
+                <input type="text" id="new-snack-location" placeholder="e.g., Desk drawer">
+            </div>
+            <div class="input-group">
+                <label>Take Initial Photo (Optional)</label>
+                <button class="btn btn-secondary" onclick="takePhoto('new-snack-photo')">📷 Take Photo</button>
+                <img id="new-snack-photo-preview" class="photo-preview" style="display:none;">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('add-snack-modal')">Cancel</button>
+                <button class="btn" onclick="addSnack()">Add Snack</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Modal -->
+    <div id="audit-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Audit Snack</div>
+            <div class="input-group">
+                <label>Current Weight (grams)</label>
+                <input type="number" id="audit-weight" placeholder="Enter current weight">
+            </div>
+            <div class="input-group">
+                <label>Take Photo (Optional)</label>
+                <button class="btn btn-secondary" onclick="takePhoto('audit-photo')">📷 Take Photo</button>
+                <img id="audit-photo-preview" class="photo-preview" style="display:none;">
+            </div>
+            <div id="audit-loading" class="loading" style="display:none;">
+                <div class="spinner"></div>
+                <div>Analyzing...</div>
+            </div>
+            <div id="audit-results" style="display:none;"></div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('audit-modal')">Cancel</button>
+                <button class="btn" onclick="performAudit()">🔍 Audit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snack Taken Modal -->
+    <div id="snack-taken-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Log Snack Consumption</div>
+            <div class="input-group">
+                <label>New Weight (grams)</label>
+                <input type="number" id="taken-weight" placeholder="Enter new weight">
+            </div>
+            <div class="input-group">
+                <label>Update Photo (Optional)</label>
+                <button class="btn btn-secondary" onclick="takePhoto('taken-photo')">📷 Take Photo</button>
+                <img id="taken-photo-preview" class="photo-preview" style="display:none;">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('snack-taken-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="logSnackTaken()">✅ Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mark Suspect Modal -->
+    <div id="suspect-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Who Did This?</div>
+            <div class="input-group">
+                <label>Select Suspect</label>
+                <select id="suspect-select"></select>
+            </div>
+            <div class="input-group">
+                <label>Confidence Level</label>
+                <select id="confidence-level">
+                    <option value="low">Low - Circumstantial</option>
+                    <option value="medium" selected>Medium - Likely</option>
+                    <option value="high">High - Caught Red-Handed</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Notes (Optional)</label>
+                <textarea id="suspect-notes" rows="3" placeholder="Any additional evidence..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('suspect-modal')">Cancel</button>
+                <button class="btn btn-danger" onclick="markSuspect()">🎯 Mark Suspect</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Person Modal -->
+    <div id="add-person-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Add Person</div>
+            <div class="input-group">
+                <label>Name</label>
+                <input type="text" id="new-person-name" placeholder="e.g., Roommate Steve">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('add-person-modal')">Cancel</button>
+                <button class="btn" onclick="addPerson()">Add Person</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Capture Modal -->
+    <div id="photo-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Take Photo</div>
+            <div class="camera-container">
+                <video id="camera-video" autoplay playsinline></video>
+                <canvas id="camera-canvas" style="display:none;"></canvas>
+                <button class="capture-btn" onclick="capturePhoto()"></button>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeCamera()">Cancel</button>
+                <button class="btn" onclick="confirmPhoto()">Use Photo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <div class="notification-header">
+            <div class="notification-title" id="notification-title"></div>
+            <button style="border:none;background:none;font-size:18px;cursor:pointer;" onclick="closeNotification()">×</button>
+        </div>
+        <div class="notification-body" id="notification-body"></div>
+    </div>
+
+    <script>
+        // Data Storage
+        let snacks = JSON.parse(localStorage.getItem('snacks') || '[]');
+        let people = JSON.parse(localStorage.getItem('people') || '[]');
+        let history = JSON.parse(localStorage.getItem('history') || '[]');
+        let settings = JSON.parse(localStorage.getItem('settings') || '{"weightThreshold": 50, "dailyConsumption": 30, "enableNotifications": true, "saveEvidence": true, "workerUrl": ""}');
+        let currentSnackId = null;
+        let currentPhotoTarget = null;
+        let cameraStream = null;
+        let capturedPhotoData = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            renderDashboard();
+            renderSnacks();
+            renderPeople();
+        });
+
+        // Tab Navigation
+        function switchTab(tab) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(tab + '-page').classList.add('active');
+            event.target.closest('.tab').classList.add('active');
+
+            if (tab === 'dashboard') renderDashboard();
+            if (tab === 'snacks') renderSnacks();
+            if (tab === 'people') renderPeople();
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            
+            if (modalId === 'suspect-modal') {
+                populateSuspectSelect();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            
+            // Reset audit results
+            if (modalId === 'audit-modal') {
+                document.getElementById('audit-results').style.display = 'none';
+                document.getElementById('audit-loading').style.display = 'none';
+            }
+        }
+
+        // Photo Functions
+        async function takePhoto(targetId) {
+            currentPhotoTarget = targetId;
+            openModal('photo-modal');
+            
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                document.getElementById('camera-video').srcObject = cameraStream;
+            } catch (err) {
+                showNotification('Camera Error', 'Could not access camera: ' + err.message);
+                closeCamera();
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('camera-video');
+            const canvas = document.getElementById('camera-canvas');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            capturedPhotoData = canvas.toDataURL('image/jpeg', 0.8);
+        }
+
+        function confirmPhoto() {
+            if (capturedPhotoData) {
+                const preview = document.getElementById(currentPhotoTarget + '-preview');
+                if (preview) {
+                    preview.src = capturedPhotoData;
+                    preview.style.display = 'block';
+                }
+                
+                // Store photo data in a temporary variable
+                window['currentPhoto_' + currentPhotoTarget] = capturedPhotoData;
+            }
+            
+            closeCamera();
+        }
+
+        function closeCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            closeModal('photo-modal');
+            capturedPhotoData = null;
+        }
+
+        // Snack Functions
+        function addSnack() {
+            const name = document.getElementById('new-snack-name').value.trim();
+            const weight = parseFloat(document.getElementById('new-snack-weight').value);
+            const location = document.getElementById('new-snack-location').value.trim();
+            const photo = window['currentPhoto_new-snack-photo'] || null;
+
+            if (!name || !weight) {
+                showNotification('Error', 'Please fill in snack name and weight');
+                return;
+            }
+
+            const snack = {
+                id: Date.now().toString(),
+                name,
+                currentWeight: weight,
+                initialWeight: weight,
+                location,
+                photo,
+                status: 'safe',
+                createdAt: new Date().toISOString(),
+                lastChecked: new Date().toISOString(),
+                expectedConsumptionRate: settings.dailyConsumption
+            };
+
+            snacks.push(snack);
+            saveData();
+            
+            addHistory('snack_added', snack.id, `Added ${name} (${weight}g)`);
+            
+            showNotification('Success', `${name} is now being protected!`);
+            closeModal('add-snack-modal');
+            
+            // Reset form
+            document.getElementById('new-snack-name').value = '';
+            document.getElementById('new-snack-weight').value = '';
+            document.getElementById('new-snack-location').value = '';
+            document.getElementById('new-snack-photo-preview').style.display = 'none';
+            delete window['currentPhoto_new-snack-photo'];
+            
+            renderDashboard();
+            renderSnacks();
+        }
+
+        function selectSnack(snackId, action) {
+            currentSnackId = snackId;
+            
+            if (action === 'audit') {
+                openModal('audit-modal');
+            } else if (action === 'taken') {
+                openModal('snack-taken-modal');
+            }
+        }
+
+        async function performAudit() {
+            const weight = parseFloat(document.getElementById('audit-weight').value);
+            const photo = window['currentPhoto_audit-photo'] || null;
+            
+            if (!weight) {
+                showNotification('Error', 'Please enter current weight');
+                return;
+            }
+
+            const snack = snacks.find(s => s.id === currentSnackId);
+            if (!snack) return;
+
+            document.getElementById('audit-loading').style.display = 'block';
+            
+            const weightDiff = snack.currentWeight - weight;
+            const daysSinceLastCheck = (new Date() - new Date(snack.lastChecked)) / (1000 * 60 * 60 * 24);
+            const expectedConsumption = daysSinceLastCheck * snack.expectedConsumptionRate;
+            const unexpectedLoss = weightDiff - expectedConsumption;
+
+            let analysisResults = null;
+            
+            // If we have both old and new photo, analyze differences
+            if (snack.photo && photo && settings.workerUrl) {
+                try {
+                    analysisResults = await analyzePhotos(snack.photo, photo);
+                } catch (err) {
+                    console.error('Photo analysis failed:', err);
+                }
+            }
+
+            document.getElementById('audit-loading').style.display = 'none';
+            
+            // Determine if suspicious
+            const isSuspicious = unexpectedLoss > settings.weightThreshold;
+            
+            // Update snack
+            const oldWeight = snack.currentWeight;
+            snack.currentWeight = weight;
+            snack.lastChecked = new Date().toISOString();
+            
+            if (photo) {
+                if (settings.saveEvidence && snack.photo) {
+                    // Save old photo to history
+                    addHistory('audit', snack.id, `Audit: ${oldWeight}g → ${weight}g (${weightDiff.toFixed(1)}g diff)`, {
+                        oldPhoto: snack.photo,
+                        newPhoto: photo,
+                        weightDiff,
+                        suspicious: isSuspicious,
+                        analysis: analysisResults
+                    });
+                }
+                snack.photo = photo;
+            } else {
+                addHistory('audit', snack.id, `Audit: ${oldWeight}g → ${weight}g (${weightDiff.toFixed(1)}g diff)`, {
+                    weightDiff,
+                    suspicious: isSuspicious
+                });
+            }
+
+            if (isSuspicious) {
+                snack.status = 'violated';
+                saveData();
+                
+                // Show results
+                showAuditResults(snack, weightDiff, unexpectedLoss, analysisResults);
+                
+                if (settings.enableNotifications) {
+                    showNotification('🚨 THEFT DETECTED!', `${snack.name}: ${unexpectedLoss.toFixed(1)}g unauthorized consumption detected!`);
+                }
+                
+                // Ask who did it
+                setTimeout(() => {
+                    openModal('suspect-modal');
+                }, 1000);
+            } else {
+                snack.status = 'safe';
+                saveData();
+                
+                showNotification('All Clear', `${snack.name} audit complete. No suspicious activity.`);
+                closeModal('audit-modal');
+            }
+
+            // Reset form
+            document.getElementById('audit-weight').value = '';
+            document.getElementById('audit-photo-preview').style.display = 'none';
+            delete window['currentPhoto_audit-photo'];
+            
+            renderDashboard();
+            renderSnacks();
+        }
+
+        function showAuditResults(snack, weightDiff, unexpectedLoss, analysis) {
+            const resultsDiv = document.getElementById('audit-results');
+            
+            let html = `
+                <div class="card" style="background: rgba(244, 67, 54, 0.1); border: 1px solid var(--error); margin-top: 16px;">
+                    <h3 style="color: var(--error); margin-bottom: 12px;">⚠️ Suspicious Activity Detected</h3>
+                    <p><strong>Weight Loss:</strong> ${weightDiff.toFixed(1)}g</p>
+                    <p><strong>Unexpected Loss:</strong> ${unexpectedLoss.toFixed(1)}g</p>
+            `;
+            
+            if (analysis && analysis.differences) {
+                html += `
+                    <p style="margin-top: 12px;"><strong>Visual Analysis:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                `;
+                
+                analysis.differences.forEach(diff => {
+                    html += `<li style="margin-bottom: 4px;">${diff}</li>`;
+                });
+                
+                html += `</ul>`;
+            }
+            
+            html += `</div>`;
+            
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        function logSnackTaken() {
+            const weight = parseFloat(document.getElementById('taken-weight').value);
+            const photo = window['currentPhoto_taken-photo'] || null;
+            
+            if (!weight) {
+                showNotification('Error', 'Please enter new weight');
+                return;
+            }
+
+            const snack = snacks.find(s => s.id === currentSnackId);
+            if (!snack) return;
+
+            const weightDiff = snack.currentWeight - weight;
+            snack.currentWeight = weight;
+            snack.lastChecked = new Date().toISOString();
+            snack.status = 'safe';
+            
+            if (photo) {
+                snack.photo = photo;
+            }
+
+            addHistory('consumption', snack.id, `Consumed ${weightDiff.toFixed(1)}g`);
+            
+            saveData();
+            showNotification('Logged', `${snack.name} consumption recorded`);
+            closeModal('snack-taken-modal');
+            
+            // Reset form
+            document.getElementById('taken-weight').value = '';
+            document.getElementById('taken-photo-preview').style.display = 'none';
+            delete window['currentPhoto_taken-photo'];
+            
+            renderDashboard();
+            renderSnacks();
+        }
+
+        async function quickCheck() {
+            if (snacks.length === 0) {
+                showNotification('No Snacks', 'Add a snack first to use Quick Check');
+                return;
+            }
+
+            // For now, just open audit for the first snack
+            // In a real implementation, this could cycle through all snacks
+            currentSnackId = snacks[0].id;
+            openModal('audit-modal');
+        }
+
+        // People Functions
+        function addPerson() {
+            const name = document.getElementById('new-person-name').value.trim();
+            
+            if (!name) {
+                showNotification('Error', 'Please enter a name');
+                return;
+            }
+
+            const person = {
+                id: Date.now().toString(),
+                name,
+                incidents: [],
+                totalAmount: 0,
+                lastIncident: null
+            };
+
+            people.push(person);
+            saveData();
+            
+            showNotification('Added', `${name} added to watchlist`);
+            closeModal('add-person-modal');
+            
+            document.getElementById('new-person-name').value = '';
+            renderPeople();
+        }
+
+        function populateSuspectSelect() {
+            const select = document.getElementById('suspect-select');
+            select.innerHTML = '<option value="">Select a person...</option>';
+            
+            people.forEach(person => {
+                const option = document.createElement('option');
+                option.value = person.id;
+                option.textContent = person.name;
+                select.appendChild(option);
+            });
+        }
+
+        function markSuspect() {
+            const personId = document.getElementById('suspect-select').value;
+            const confidence = document.getElementById('confidence-level').value;
+            const notes = document.getElementById('suspect-notes').value.trim();
+            
+            if (!personId) {
+                showNotification('Error', 'Please select a suspect');
+                return;
+            }
+
+            const person = people.find(p => p.id === personId);
+            const snack = snacks.find(s => s.id === currentSnackId);
+            
+            if (!person || !snack) return;
+
+            // Get the last history item for this snack to get weight diff
+            const lastHistory = history.filter(h => h.snackId === currentSnackId).sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            )[0];
+            
+            const amount = lastHistory?.metadata?.weightDiff || 0;
+
+            const incident = {
+                id: Date.now().toString(),
+                snackId: currentSnackId,
+                snackName: snack.name,
+                amount,
+                confidence,
+                notes,
+                timestamp: new Date().toISOString(),
+                evidence: lastHistory?.metadata?.newPhoto || null
+            };
+
+            person.incidents.push(incident);
+            person.totalAmount += amount;
+            person.lastIncident = new Date().toISOString();
+
+            addHistory('suspect_marked', currentSnackId, `Marked ${person.name} as suspect`, {
+                personId,
+                personName: person.name,
+                confidence,
+                amount
+            });
+
+            saveData();
+            showNotification('Marked', `${person.name} has been marked for this incident`);
+            closeModal('suspect-modal');
+            
+            // Reset form
+            document.getElementById('suspect-select').value = '';
+            document.getElementById('confidence-level').value = 'medium';
+            document.getElementById('suspect-notes').value = '';
+            
+            renderPeople();
+        }
+
+        function viewPersonDetails(personId) {
+            const person = people.find(p => p.id === personId);
+            if (!person) return;
+
+            let html = `
+                <div class="modal-header">${person.name}'s Record</div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value">${person.incidents.length}</div>
+                        <div class="stat-label">Incidents</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${person.totalAmount.toFixed(0)}g</div>
+                        <div class="stat-label">Total Stolen</div>
+                    </div>
+                </div>
+                <div style="margin-top: 16px;">
+                    <h4 style="margin-bottom: 12px;">Incident History</h4>
+            `;
+
+            person.incidents.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(incident => {
+                const date = new Date(incident.timestamp).toLocaleDateString();
+                const confidenceBadge = {
+                    low: '🟡',
+                    medium: '🟠',
+                    high: '🔴'
+                }[incident.confidence];
+
+                html += `
+                    <div class="timeline-item">
+                        <div class="timeline-time">${date}</div>
+                        <div class="timeline-content">
+                            ${confidenceBadge} ${incident.snackName}: ${incident.amount.toFixed(1)}g
+                            ${incident.notes ? `<br><small>${incident.notes}</small>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn btn-secondary" onclick="resetPersonRecord('${personId}')">Reset Record</button>
+                    <button class="btn" onclick="closeModal('person-detail-modal')">Close</button>
+                </div>
+            `;
+
+            const modal = document.createElement('div');
+            modal.id = 'person-detail-modal';
+            modal.className = 'modal active';
+            modal.innerHTML = `<div class="modal-content">${html}</div>`;
+            document.body.appendChild(modal);
+        }
+
+        function resetPersonRecord(personId) {
+            if (!confirm('Are you sure you want to reset this person\'s record?')) return;
+
+            const person = people.find(p => p.id === personId);
+            if (!person) return;
+
+            person.incidents = [];
+            person.totalAmount = 0;
+            person.lastIncident = null;
+
+            saveData();
+            showNotification('Reset', `${person.name}'s record has been cleared`);
+            
+            const modal = document.getElementById('person-detail-modal');
+            if (modal) modal.remove();
+            
+            renderPeople();
+        }
+
+        // Image Analysis
+        async function analyzePhotos(oldPhoto, newPhoto) {
+            if (!settings.workerUrl) {
+                throw new Error('Worker URL not configured');
+            }
+
+            const response = await fetch(settings.workerUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    oldPhoto: oldPhoto.split(',')[1], // Remove data:image prefix
+                    newPhoto: newPhoto.split(',')[1]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Analysis failed');
+            }
+
+            return await response.json();
+        }
+
+        // History
+        function addHistory(type, snackId, description, metadata = {}) {
+            history.unshift({
+                id: Date.now().toString(),
+                type,
+                snackId,
+                description,
+                metadata,
+                timestamp: new Date().toISOString()
+            });
+
+            // Keep only last 100 items
+            if (history.length > 100) {
+                history = history.slice(0, 100);
+            }
+
+            saveData();
+        }
+
+        // Rendering Functions
+        function renderDashboard() {
+            // Render snack list
+            const snackList = document.getElementById('snack-list');
+            if (snacks.length === 0) {
+                snackList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🍿</div><div>No snacks yet. Add one to get started!</div></div>';
+            } else {
+                snackList.innerHTML = snacks.map(snack => {
+                    const statusClass = `status-${snack.status}`;
+                    const statusText = {
+                        safe: '✅ Safe',
+                        suspicious: '⚠️ Suspicious',
+                        violated: '🚨 Violated'
+                    }[snack.status];
+
+                    return `
+                        <div class="snack-item">
+                            <div class="snack-header">
+                                <div class="snack-name">${snack.name}</div>
+                                <span class="snack-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="snack-weight">${snack.currentWeight}g • ${snack.location || 'No location'}</div>
+                            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                                <button class="btn btn-secondary btn-small" onclick="selectSnack('${snack.id}', 'audit')">🔍 Audit</button>
+                                <button class="btn btn-small" onclick="selectSnack('${snack.id}', 'taken')">✅ I ate some</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render recent activity
+            const activityDiv = document.getElementById('recent-activity');
+            const recentHistory = history.slice(0, 5);
+            
+            if (recentHistory.length === 0) {
+                activityDiv.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div>No activity yet</div></div>';
+            } else {
+                activityDiv.innerHTML = recentHistory.map(item => {
+                    const date = new Date(item.timestamp);
+                    const timeStr = date.toLocaleString();
+                    
+                    return `
+                        <div class="timeline-item">
+                            <div class="timeline-time">${timeStr}</div>
+                            <div class="timeline-content">${item.description}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderSnacks() {
+            const snacksList = document.getElementById('all-snacks-list');
+            
+            if (snacks.length === 0) {
+                snacksList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🍿</div><div>No snacks yet. Add one to get started!</div></div>';
+                return;
+            }
+
+            snacksList.innerHTML = snacks.map(snack => {
+                const statusClass = `status-${snack.status}`;
+                const statusText = {
+                    safe: '✅ Safe',
+                    suspicious: '⚠️ Suspicious',
+                    violated: '🚨 Violated'
+                }[snack.status];
+
+                const daysSinceCreated = Math.floor((new Date() - new Date(snack.createdAt)) / (1000 * 60 * 60 * 24));
+                const totalConsumed = snack.initialWeight - snack.currentWeight;
+
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">${snack.name}</div>
+                            <span class="snack-status ${statusClass}">${statusText}</span>
+                        </div>
+                        ${snack.photo ? `<img src="${snack.photo}" class="photo-preview">` : ''}
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-value">${snack.currentWeight}g</div>
+                                <div class="stat-label">Current</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${totalConsumed.toFixed(0)}g</div>
+                                <div class="stat-label">Consumed</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary);">
+                            📍 ${snack.location || 'No location'} • 📅 ${daysSinceCreated} days old
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn btn-secondary btn-small" onclick="selectSnack('${snack.id}', 'audit')">🔍 Audit</button>
+                            <button class="btn btn-small" onclick="selectSnack('${snack.id}', 'taken')">✅ I ate some</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPeople() {
+            const peopleList = document.getElementById('people-list');
+            
+            if (people.length === 0) {
+                peopleList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><div>No people added yet</div></div>';
+                return;
+            }
+
+            // Sort by total amount stolen
+            const sortedPeople = [...people].sort((a, b) => b.totalAmount - a.totalAmount);
+
+            peopleList.innerHTML = sortedPeople.map((person, index) => {
+                const initials = person.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+
+                return `
+                    <div class="person-card" onclick="viewPersonDetails('${person.id}')">
+                        <div class="person-avatar">${initials}</div>
+                        <div class="person-info">
+                            <div class="person-name">${rankEmoji} ${person.name}</div>
+                            <div class="person-stats">${person.incidents.length} incidents • ${person.totalAmount.toFixed(0)}g stolen</div>
+                        </div>
+                        ${person.incidents.length > 0 ? `<span class="badge">${person.incidents.length}</span>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Settings
+        function loadSettings() {
+            document.getElementById('weight-threshold').value = settings.weightThreshold;
+            document.getElementById('daily-consumption').value = settings.dailyConsumption;
+            document.getElementById('enable-notifications').checked = settings.enableNotifications;
+            document.getElementById('save-evidence').checked = settings.saveEvidence;
+            document.getElementById('worker-url').value = settings.workerUrl || '';
+        }
+
+        function saveSettings() {
+            settings.weightThreshold = parseFloat(document.getElementById('weight-threshold').value);
+            settings.dailyConsumption = parseFloat(document.getElementById('daily-consumption').value);
+            settings.enableNotifications = document.getElementById('enable-notifications').checked;
+            settings.saveEvidence = document.getElementById('save-evidence').checked;
+            settings.workerUrl = document.getElementById('worker-url').value.trim();
+
+            localStorage.setItem('settings', JSON.stringify(settings));
+            showNotification('Saved', 'Settings have been saved');
+        }
+
+        // Data Management
+        function saveData() {
+            localStorage.setItem('snacks', JSON.stringify(snacks));
+            localStorage.setItem('people', JSON.stringify(people));
+            localStorage.setItem('history', JSON.stringify(history));
+        }
+
+        function exportData() {
+            const data = {
+                snacks,
+                people,
+                history,
+                settings,
+                exportDate: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `snackguard-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showNotification('Exported', 'Data has been exported');
+        }
+
+        function clearAllData() {
+            if (!confirm('Are you sure you want to delete ALL data? This cannot be undone!')) return;
+            if (!confirm('Really? All snacks, people, and history will be permanently deleted.')) return;
+
+            localStorage.clear();
+            snacks = [];
+            people = [];
+            history = [];
+            settings = {
+                weightThreshold: 50,
+                dailyConsumption: 30,
+                enableNotifications: true,
+                saveEvidence: true,
+                workerUrl: ''
+            };
+
+            renderDashboard();
+            renderSnacks();
+            renderPeople();
+            loadSettings();
+
+            showNotification('Cleared', 'All data has been deleted');
+        }
+
+        // Notifications
+        function showNotification(title, body) {
+            document.getElementById('notification-title').textContent = title;
+            document.getElementById('notification-body').textContent = body;
+            document.getElementById('notification').classList.add('active');
+
+            setTimeout(() => {
+                closeNotification();
+            }, 5000);
+        }
+
+        function closeNotification() {
+            document.getElementById('notification').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
